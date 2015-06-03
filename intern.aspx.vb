@@ -160,15 +160,19 @@ Public Class intern
             'Debug.Print(drv(5))
             Dim bisdate As Date = Date.Parse(drv(5))
             Dim heute As Date = Date.Now
-
-
-            If bisdate < heute Then
-                strSQL = "update stellen set oeffentlich ='" & ver & "' where id= '" & id & "' "
-            Else
-                strSQL = "update stellen set oeffentlich ='" & anz & "' where id= '" & id & "' "
+            Dim mVerbergen as String
+            
+            mVerbergen = strsql = "SELECT mVerbergen FROM stellen where id = '" & id & "' "
+            slectSQL()
+            
+            If mVerbergen = "anzeigen" Then
+                If bisdate < heute Then
+                    strSQL = "update stellen set oeffentlich ='" & ver & "' where id= '" & id & "' "
+                Else
+                    strSQL = "update stellen set oeffentlich ='" & anz & "' where id= '" & id & "' "
+                End If
+                updateSQL()
             End If
-            updateSQL()
-
         End If
 
     End Sub
