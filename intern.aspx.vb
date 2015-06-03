@@ -54,7 +54,7 @@ Public Class intern
     End Sub
 
     Sub lesen()
-        strSQL = "SELECT id, docname, displayname, author, oeffentlich, gueltigbis FROM Stellen ORDER BY id ASC"
+        strSQL = "SELECT id, docname, displayname, author, oeffentlich, CONVERT(varchar(10),[gueltigbis], 104) AS gueltigbis FROM Stellen ORDER BY id ASC"
         updateSQL()
     End Sub
 
