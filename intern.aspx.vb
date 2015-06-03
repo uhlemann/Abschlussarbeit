@@ -13,30 +13,23 @@ Public Class intern
 
     Dim strSQL As String
     Dim dtList As DataTable = New DataTable
+    Dim button As Integer = 0
 
     Protected Sub Page_Load(ByVal sender As Object, ByVal e As System.EventArgs) Handles Me.Load
 
         readDirAndWrite()
+
         lesen()
+
 
     End Sub
 
     Sub refresh()
         Response.Redirect(Request.RawUrl)
     End Sub
-    
-    Sub selectSQL()
-        dtList.clear()
-        Using cn As New OleDbConnection With
-        {.ConnectionString = strConnectionString}
-            Using cmd As New OleDbCommand With
-                {.Connection = cn, .CommandText = strSQL}
-                    cn.Open()
-                    dtList.Load(cmd.ExecuteReader)
-            End Using
-    End Sub
 
-    Sub updateSQL()
+    Sub selectSQL()
+        dtList.Clear()
         Using cn As New OleDbConnection With
         {.ConnectionString = strConnectionString}
             Using cmd As New OleDbCommand With
@@ -47,10 +40,22 @@ Public Class intern
         End Using
     End Sub
 
+    Sub UpdateSQL()
+        Using cn As New OleDbConnection With
+        {.ConnectionString = strconnectionString}
+            Using cmd As New OleDbCommand With
+                {.Connection = cn, .CommandText = strSQL}
+                cn.Open()
+                cmd.ExecuteNonQuery()
+            End Using
+        End Using
+    End Sub
+
+
     Sub lesen()
-        strSQL = "SELECT id, docname, displayname, author, oeffentlich, CONVERT(varchar(10),[gueltigbis], 104) AS gueltigbis FROM Stellen ORDER BY id ASC"
+        strSQL = "SELECT id, docname, displayname, author, oeffentlich, CONVERT(varchar(10),[gueltigbis], 104) as gueltigbis FROM Stellen ORDER BY id ASC"
         selectSQL()
-        
+
         If dtList.Rows.Count > 0 Then
             grdResults.Visible = True
             grdResults.AutoGenerateColumns = False
@@ -62,6 +67,8 @@ Public Class intern
                 grdResults.HeaderRow.TableSection = TableRowSection.TableHeader
             Catch ex As Exception
             End Try
+
+        End If
     End Sub
 
     Sub readDirAndWrite()
@@ -75,10 +82,11 @@ Public Class intern
                 tmpDisp = IO.Path.GetFileName(item)
 
                 strSQL = "IF NOT EXISTS (SELECT * FROM Stellen WHERE docname = '" & tmpDoc & "')" & _
-                    "INSERT INTO Stellen (docname, displayname, author, oeffentlich)" & _
-                    "VALUES ('" & tmpDoc & "', '" & tmpDisp & "', 'author', 'verbergen')"
+                    "INSERT INTO Stellen (docname, displayname, author, oeffentlich, mVerbergen)" & _
+                    "VALUES ('" & tmpDoc & "', '" & tmpDisp & "', 'author', 'verbergen', 'anzeigen')"
 
-                updateSQL()
+                UpdateSQL()
+
             End If
         Next
     End Sub
@@ -88,6 +96,8 @@ Public Class intern
         'ermittelt die Reihe in der ein Burron betaetigt wurde
         Dim index As Integer = Convert.ToInt32(e.CommandArgument)
         Dim row As GridViewRow = grdResults.Rows(index)
+        Dim heute As Date = Date.Now
+        Dim bisdate As Date = row.Cells(5).Text
 
         'die Reihe wird vorher durch "row" ermittelt
         '0 = erste Spallte (ID) 
@@ -105,16 +115,18 @@ Public Class intern
         Select Case e.CommandName
 
             Case "anzeigen"
-                strSQL = "UPDATE Stellen SET oeffentlich='" & anz & "' WHERE ID= " & id & " "
-                updateSQL()
+                If bisdate > heute Then
+                    strSQL = "UPDATE Stellen SET oeffentlich='" & anz & "', mVerbergen='" & anz & "' WHERE ID= " & id & " "
+                    UpdateSQL()
+                End If
 
             Case "verbergen"
-                strSQL = "UPDATE Stellen SET oeffentlich='" & ver & "' WHERE ID= " & id & " "
-                updateSQL()
+                strSQL = "UPDATE Stellen SET oeffentlich='" & ver & "', mVerbergen='" & ver & "' WHERE ID= " & id & " "
+                UpdateSQL()
 
             Case "loeschen"
                 strSQL = "DELETE FROM Stellen WHERE ID = " & id & " "
-                updateSQL()
+                UpdateSQL()
 
             Case "datei"
                 If erw = "doc" Then
@@ -126,8 +138,8 @@ Public Class intern
                 End If
 
         End Select
-        updateSQL()
-        refresh()
+
+        lesen()
 
 
     End Sub
@@ -160,19 +172,12 @@ Public Class intern
             'Debug.Print(drv(5))
             Dim bisdate As Date = Date.Parse(drv(5))
             Dim heute As Date = Date.Now
-            Dim mVerbergen as String
-            
-            mVerbergen = strsql = "SELECT mVerbergen FROM stellen where id = '" & id & "' "
-            slectSQL()
-            
-            If mVerbergen = "anzeigen" Then
-                If bisdate < heute Then
-                    strSQL = "update stellen set oeffentlich ='" & ver & "' where id= '" & id & "' "
-                Else
-                    strSQL = "update stellen set oeffentlich ='" & anz & "' where id= '" & id & "' "
-                End If
-                updateSQL()
+
+            If bisdate < heute Then
+                strSQL = "update stellen set oeffentlich ='" & ver & "' where id= '" & id & "' "
             End If
+            UpdateSQL()
+
         End If
 
     End Sub
@@ -198,8 +203,8 @@ Public Class intern
             strSQL = "UPDATE Stellen SET gueltigbis='" & gueltig & "' WHERE ID= '" & id & "' "
         End If
 
-        updateSQL()
-        refresh()
+        UpdateSQL()
+        lesen()
     End Sub
 
 End Class
