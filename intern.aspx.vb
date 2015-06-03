@@ -38,6 +38,10 @@ Public Class intern
 
     End Sub
 
+    Sub refresh()
+        Response.Redirect(Request.RawUrl)
+    End Sub
+
     Sub updateSQL()
         Using cn As New OleDbConnection With
         {.ConnectionString = strConnectionString}
@@ -50,7 +54,6 @@ Public Class intern
     End Sub
 
     Sub lesen()
-
         strSQL = "SELECT id, docname, displayname, author, oeffentlich, gueltigbis FROM Stellen ORDER BY id ASC"
         updateSQL()
     End Sub
@@ -97,12 +100,15 @@ Public Class intern
 
             Case "anzeigen"
                 strSQL = "UPDATE Stellen SET oeffentlich='" & anz & "' WHERE ID= " & id & " "
+                updateSQL()
 
             Case "verbergen"
                 strSQL = "UPDATE Stellen SET oeffentlich='" & ver & "' WHERE ID= " & id & " "
+                updateSQL()
 
             Case "loeschen"
                 strSQL = "DELETE FROM Stellen WHERE ID = " & id & " "
+                updateSQL()
 
             Case "datei"
                 If erw = "doc" Then
@@ -114,9 +120,9 @@ Public Class intern
                 End If
 
         End Select
-
-        MsgBox(erw)
         updateSQL()
+        refresh()
+
 
     End Sub
 
@@ -125,6 +131,7 @@ Public Class intern
         Dim drv As DataRowView = e.Row.DataItem
         Dim ver As String = "verbergen"
         Dim anz As String = "anzeigen"
+        Dim id As String = e.Row.Cells(0).Text
 
         If e.Row.RowType = DataControlRowType.DataRow Then
 
@@ -134,6 +141,7 @@ Public Class intern
             If InStr(e.Row.Cells(4).Text, "anzeigen") >= 1 Then
                 e.Row.Cells(6).Visible = False
                 e.Row.Cells(7).Visible = True
+
                 'verbergen
             Else
                 e.Row.Cells(6).Visible = True
@@ -143,19 +151,20 @@ Public Class intern
             End If
 
             'wenn datum kleiner als aktuelles datum dannn trage "verbergen" in die spalte "oeffentlich" ein
-            Debug.Print(drv(5).ToString)
-            Dim bisdate As Date = Date.Parse(drv(5).ToString)
+            'Debug.Print(drv(5))
+            Dim bisdate As Date = Date.Parse(drv(5))
             Dim heute As Date = Date.Now
-            Dim result As Integer = Date.Compare(bisdate, heute)
 
-            If result < 0 Then
-                strSQL = "update stellen set oeffentlich='" & ver & "' where id= " & ID & " "
-            End If
 
-            If result > 0 Then
-                strSQL = "update stellen set oeffentlich='" & anz & "' where id= " & ID & " "
+            If bisdate < heute Then
+                strSQL = "update stellen set oeffentlich ='" & ver & "' where id= '" & id & "' "
+            Else
+                strSQL = "update stellen set oeffentlich ='" & anz & "' where id= '" & id & "' "
             End If
+            updateSQL()
+
         End If
+
     End Sub
     Sub uebernehmen_Click(ByVal sender As Object, e As System.EventArgs)
 
@@ -180,6 +189,7 @@ Public Class intern
         End If
 
         updateSQL()
+        refresh()
     End Sub
 
 End Class
