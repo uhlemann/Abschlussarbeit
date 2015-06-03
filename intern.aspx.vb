@@ -17,24 +17,7 @@ Public Class intern
     Protected Sub Page_Load(ByVal sender As Object, ByVal e As System.EventArgs) Handles Me.Load
 
         readDirAndWrite()
-
         lesen()
-
-        If dtList.Rows.Count > 0 Then
-            grdResults.Visible = True
-            grdResults.AutoGenerateColumns = False
-            grdResults.DataSource = dtList
-            grdResults.DataBind()
-            grdResults.UseAccessibleHeader = True
-
-            Try
-                grdResults.HeaderRow.TableSection = TableRowSection.TableHeader
-            Catch ex As Exception
-            End Try
-
-
-
-        End If
 
     End Sub
 
@@ -67,6 +50,18 @@ Public Class intern
     Sub lesen()
         strSQL = "SELECT id, docname, displayname, author, oeffentlich, CONVERT(varchar(10),[gueltigbis], 104) AS gueltigbis FROM Stellen ORDER BY id ASC"
         selectSQL()
+        
+        If dtList.Rows.Count > 0 Then
+            grdResults.Visible = True
+            grdResults.AutoGenerateColumns = False
+            grdResults.DataSource = dtList
+            grdResults.DataBind()
+            grdResults.UseAccessibleHeader = True
+
+            Try
+                grdResults.HeaderRow.TableSection = TableRowSection.TableHeader
+            Catch ex As Exception
+            End Try
     End Sub
 
     Sub readDirAndWrite()
