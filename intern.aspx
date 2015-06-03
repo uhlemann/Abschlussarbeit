@@ -220,8 +220,8 @@ div.trblumen
             
             <asp:boundfield datafield="displayname" htmlencode="false" headertext="Anzeige" HeaderStyle-HorizontalAlign="Left" HeaderStyle-ForeColor="Black"/>
             <asp:boundfield datafield="author" htmlencode="false" headertext="Autor" HeaderStyle-HorizontalAlign="Left" HeaderStyle-ForeColor="Black"/>
-            <asp:boundfield datafield="oeffentlich" htmlencode="false" headertext=""  HeaderStyle-HorizontalAlign="Left" HeaderStyle-ForeColor="Black"/>
-            <asp:boundfield datafield="gueltigbis" htmlencode="false" headertext="gültig bis" HeaderStyle-HorizontalAlign="Left" HeaderStyle-ForeColor="Black"/>
+            <asp:boundfield datafield="oeffentlich" htmlencode="false" headertext="gültig bis" ItemStyle-Font-Size="0" HeaderStyle-HorizontalAlign="Left" HeaderStyle-ForeColor="Black"/>
+            <asp:boundfield datafield="gueltigbis" htmlencode="false" headertext="" HeaderStyle-HorizontalAlign="Left" HeaderStyle-ForeColor="Black" />
 
             <asp:ButtonField ButtonType="Button" CommandName="anzeigen" HeaderText="" Text="anzeigen" ItemStyle-HorizontalAlign="center" />
             <asp:ButtonField ButtonType="Button" CommandName="verbergen" HeaderText="" Text="verbergen" ItemStyle-HorizontalAlign="center" />
