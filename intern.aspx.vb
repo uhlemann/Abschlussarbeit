@@ -41,6 +41,17 @@ Public Class intern
     Sub refresh()
         Response.Redirect(Request.RawUrl)
     End Sub
+    
+    Sub selectSQL()
+        dtList.clear()
+        Using cn As New OleDbConnection With
+        {.ConnectionString = strConnectionString}
+            Using cmd As New OleDbCommand With
+                {.Connection = cn, .CommandText = strSQL}
+                    cn.Open()
+                    dtList.Load(cmd.ExecuteReader)
+            End Using
+    End Sub
 
     Sub updateSQL()
         Using cn As New OleDbConnection With
@@ -55,7 +66,7 @@ Public Class intern
 
     Sub lesen()
         strSQL = "SELECT id, docname, displayname, author, oeffentlich, CONVERT(varchar(10),[gueltigbis], 104) AS gueltigbis FROM Stellen ORDER BY id ASC"
-        updateSQL()
+        selectSQL()
     End Sub
 
     Sub readDirAndWrite()
