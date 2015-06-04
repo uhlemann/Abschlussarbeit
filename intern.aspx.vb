@@ -134,7 +134,8 @@ Public Class intern
                 UpdateSQL()
 
             Case "speichern"
-                'e.Item.FindControl("PriceLabel")
+                strSQL = "UPDATE Stellen SET displayname = '" & dispname & "', author = '" & auth & "', gueltigbis = '" & datum & "' WHERE ID = " & id & " "
+                UpdateSQL()
 
             Case "datei"
                 If erw = "doc" Then
