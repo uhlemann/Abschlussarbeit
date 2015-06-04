@@ -24,10 +24,6 @@ Public Class intern
 
     End Sub
 
-    Sub refresh()
-        Response.Redirect(Request.RawUrl)
-    End Sub
-
     Sub selectSQL()
         dtList.Clear()
         Using cn As New OleDbConnection With
@@ -105,6 +101,15 @@ Public Class intern
         Dim doc As String = row.Cells(1).Text
         Dim erw As String = Right(doc, 3)
 
+        Dim tb_dispname As TextBox = row.Cells(2).Controls(0)
+        Dim dispname As String = tb_dispname.Text
+
+        Dim tb_auth As TextBox = row.Cells(3).Controls(0)
+        Dim auth As String = tb_auth.Text
+
+        Dim tb_datum As TextBox = row.Cells(5).Controls(0)
+        Dim datum As String = tb_datum.Text
+
         'uebergibt den Wert der in die Spalte "anzeigen" eingetragen werden soll
         Dim anz As String = "anzeigen"
         Dim ver As String = "verbergen"
@@ -128,6 +133,9 @@ Public Class intern
                 strSQL = "DELETE FROM Stellen WHERE ID = " & id & " "
                 UpdateSQL()
 
+            Case "speichern"
+                'e.Item.FindControl("PriceLabel")
+
             Case "datei"
                 If erw = "doc" Then
                     Process.Start(pfad + doc)
@@ -150,8 +158,38 @@ Public Class intern
         Dim ver As String = "verbergen"
         Dim anz As String = "anzeigen"
         Dim id As String = e.Row.Cells(0).Text
+        Dim calendar = New Calendar
 
         If e.Row.RowType = DataControlRowType.DataRow Then
+            Dim TB_displayname = New TextBox
+            TB_displayname.Style.Add("width", "120px")
+            TB_displayname.ID = "TBname-" & id
+            Try
+                TB_displayname.Text = drv("displayname")
+            Catch ex As Exception
+                TB_displayname.Text = ""
+            End Try
+            e.Row.Cells(2).Controls.Add(TB_displayname)
+
+            Dim TB_author = New TextBox
+            TB_author.Style.Add("width", "120px")
+            TB_author.ID = "TBauthor-" & id
+            Try
+                TB_author.Text = drv("author")
+            Catch ex As Exception
+                TB_author.Text = ""
+            End Try
+            e.Row.Cells(3).Controls.Add(TB_author)
+
+            Dim TB_date = New TextBox
+            TB_date.Style.Add("width", "120px")
+            TB_date.ID = "TBdate-" & id
+            Try
+                TB_date.Text = drv("gueltigbis")
+            Catch ex As Exception
+                TB_date.Text = ""
+            End Try
+            e.Row.Cells(5).Controls.Add(TB_date)
 
             e.Row.Cells(4).Visible = False
 
@@ -164,8 +202,9 @@ Public Class intern
             Else
                 e.Row.Cells(6).Visible = True
                 e.Row.Cells(7).Visible = False
-                'wenn verbergen dann Zeile rot faerben
-                e.Row.Style.Add("color", "#DF0101")
+                'wenn verbergen dann Zeile grau faerben
+                e.Row.Style.Add("color", "gray")
+                e.Row.Font.Strikeout = True
             End If
 
             'wenn datum kleiner als aktuelles datum dannn trage "verbergen" in die spalte "oeffentlich" ein
@@ -180,31 +219,6 @@ Public Class intern
 
         End If
 
-    End Sub
-    Sub uebernehmen_Click(ByVal sender As Object, e As System.EventArgs)
-
-        Dim id As String = TB_ID.Text
-        Dim author As String = TB_Author.Text
-        Dim anzeige As String = TB_Anzeige.Text
-        Dim gueltig As String = TB_gueltig.Text
-
-        If TB_Author.Text.Length < 1 Then
-        Else
-            strSQL = "UPDATE Stellen SET author='" & author & "' WHERE ID= '" & id & "' "
-        End If
-
-        If TB_Anzeige.Text.Length < 1 Then
-        Else
-            strSQL = "UPDATE Stellen SET displayname='" & anzeige & "' WHERE ID= '" & id & "' "
-        End If
-
-        If TB_gueltig.Text.Length < 1 Then
-        Else
-            strSQL = "UPDATE Stellen SET gueltigbis='" & gueltig & "' WHERE ID= '" & id & "' "
-        End If
-
-        UpdateSQL()
-        lesen()
     End Sub
 
 End Class
