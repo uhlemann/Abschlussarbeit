@@ -13,17 +13,13 @@ Public Class intern
 
     Dim strSQL As String
     Dim dtList As DataTable = New DataTable
-    Dim button As Integer = 0
 
     Protected Sub Page_Load(ByVal sender As Object, ByVal e As System.EventArgs) Handles Me.Load
-
         readDirAndWrite()
-
         lesen()
-
-
     End Sub
 
+    REM holt werte aus einer Datenbank und uebertraeg diese in "dtList"
     Sub selectSQL()
         dtList.Clear()
         Using cn As New OleDbConnection With
@@ -36,6 +32,7 @@ Public Class intern
         End Using
     End Sub
 
+    REM uebergibt Werte an eine Datenbank und verarbeitet diese
     Sub UpdateSQL()
         Using cn As New OleDbConnection With
         {.ConnectionString = strconnectionString}
@@ -47,7 +44,7 @@ Public Class intern
         End Using
     End Sub
 
-
+    REM liest eine Datenbank Tabelle aus
     Sub lesen()
         strSQL = "SELECT id, docname, displayname, author, oeffentlich, CONVERT(varchar(10),[gueltigbis], 104) as gueltigbis FROM Stellen ORDER BY id ASC"
         selectSQL()
@@ -67,6 +64,7 @@ Public Class intern
         End If
     End Sub
 
+    REM liest einen Ordner aus und schreibt die Eintraege in die Datenbank
     Sub readDirAndWrite()
 
         Dim tmpDoc As String
@@ -89,55 +87,63 @@ Public Class intern
 
     Public Sub grdResults_RowCommand(ByVal sender As Object, ByVal e As GridViewCommandEventArgs)
 
-        'ermittelt die Reihe in der ein Burron betaetigt wurde
+        REM ermittelt die Reihe in der ein Button betaetigt wurde
         Dim index As Integer = Convert.ToInt32(e.CommandArgument)
         Dim row As GridViewRow = grdResults.Rows(index)
         Dim heute As Date = Date.Now
         Dim bisdate As Date = row.Cells(5).Text
 
-        'die Reihe wird vorher durch "row" ermittelt
-        '0 = erste Spallte (ID) 
+        REM die Reihe wird vorher durch "row" ermittelt
+        REM 0 = erste Spallte (ID) 
         Dim id As Integer = row.Cells(0).Text
         Dim doc As String = row.Cells(1).Text
         Dim erw As String = Right(doc, 3)
 
+        REM Textbox fuer das Feld "displayname"
         Dim tb_dispname As TextBox = row.Cells(2).Controls(0)
         Dim dispname As String = tb_dispname.Text
 
+        REM Textbox fuer das Feld "author"
         Dim tb_auth As TextBox = row.Cells(3).Controls(0)
         Dim auth As String = tb_auth.Text
 
+        REM Textbox fuer das Feld "gueltigbis"
         Dim tb_datum As TextBox = row.Cells(5).Controls(0)
         Dim datum As String = tb_datum.Text
 
-        'uebergibt den Wert der in die Spalte "anzeigen" eingetragen werden soll
         Dim anz As String = "anzeigen"
         Dim ver As String = "verbergen"
         Dim pfad As String = "X:\Stellen\"
         Dim pfad2 As String = "X:\Stellen\pdf\"
 
-        'ermittelt welcher Button betaetigt wurde
         Select Case e.CommandName
+            REM ermittelt welcher Button betaetigt wurde
 
             Case "anzeigen"
+                REM das Dokument kann nur dann fuer den User angezeigt werden wenn,
+                REM das heutige Datum kleiner ist als "bisdate"
                 If bisdate > heute Then
                     strSQL = "UPDATE Stellen SET oeffentlich='" & anz & "', mVerbergen='" & anz & "' WHERE ID= " & id & " "
                     UpdateSQL()
                 End If
 
             Case "verbergen"
+                REM macht das Dokument fuer den User "unsichtbar"
                 strSQL = "UPDATE Stellen SET oeffentlich='" & ver & "', mVerbergen='" & ver & "' WHERE ID= " & id & " "
                 UpdateSQL()
 
             Case "loeschen"
+                REM loescht den eintrag aus der Datenbank
                 strSQL = "DELETE FROM Stellen WHERE ID = " & id & " "
                 UpdateSQL()
 
             Case "speichern"
+                REM uebernimmt die geanderten eintraege in die Datenbank
                 strSQL = "UPDATE Stellen SET displayname = '" & dispname & "', author = '" & auth & "', gueltigbis = '" & datum & "' WHERE ID = " & id & " "
                 UpdateSQL()
 
             Case "datei"
+                REM gibt den Pfad zum Dokument an
                 If erw = "doc" Then
                     Process.Start(pfad + doc)
                 ElseIf erw = "pdf" Then
@@ -150,7 +156,6 @@ Public Class intern
 
         lesen()
 
-
     End Sub
 
     Sub grdResults_RowDataBound(ByVal sender As Object, ByVal e As GridViewRowEventArgs)
@@ -162,6 +167,8 @@ Public Class intern
         Dim calendar = New Calendar
 
         If e.Row.RowType = DataControlRowType.DataRow Then
+
+            REM erstellt Textboxen fuer die Spalte "displayname"
             Dim TB_displayname = New TextBox
             TB_displayname.Style.Add("width", "120px")
             TB_displayname.ID = "TBname-" & id
@@ -172,6 +179,7 @@ Public Class intern
             End Try
             e.Row.Cells(2).Controls.Add(TB_displayname)
 
+            REM erstellt Textboxen fuer die Spalte "author"
             Dim TB_author = New TextBox
             TB_author.Style.Add("width", "120px")
             TB_author.ID = "TBauthor-" & id
@@ -182,6 +190,7 @@ Public Class intern
             End Try
             e.Row.Cells(3).Controls.Add(TB_author)
 
+            REM erstellt Textboxen fuer die Spalte "gueltigbis"
             Dim TB_date = New TextBox
             TB_date.Style.Add("width", "120px")
             TB_date.ID = "TBdate-" & id
@@ -192,27 +201,28 @@ Public Class intern
             End Try
             e.Row.Cells(5).Controls.Add(TB_date)
 
+            REM verbirgt die Spalte "oeffentlich"
             e.Row.Cells(4).Visible = False
 
-            'anzeigen
+            REM wenn "anzeigen" als Eintrag vorhanden ist wird der Button "verbergen" angezeigt
             If InStr(e.Row.Cells(4).Text, "anzeigen") >= 1 Then
                 e.Row.Cells(6).Visible = False
                 e.Row.Cells(7).Visible = True
 
-                'verbergen
+                REM wenn "verbergen" als Eintrag vorhanden ist wird der Button "anzeigen" angezeigt
             Else
                 e.Row.Cells(6).Visible = True
                 e.Row.Cells(7).Visible = False
-                'wenn verbergen dann Zeile grau faerben
+                REM wenn "verbergen" als Eintrag vorhanden ist, dann Zeile grau faerben und durchstreichen
                 e.Row.Style.Add("color", "gray")
                 e.Row.Font.Strikeout = True
             End If
 
-            'wenn datum kleiner als aktuelles datum dannn trage "verbergen" in die spalte "oeffentlich" ein
-            'Debug.Print(drv(5))
+            REM wenn datum kleiner als aktuelles datum dannn trage "verbergen" in die spalte "oeffentlich" ein
             Dim bisdate As Date = Date.Parse(drv(5))
             Dim heute As Date = Date.Now
 
+            REM wenn das huetige Datum groesser als "bisdate" ist, wird "verbergen" in die Spalte oeffentlich eingetragen
             If bisdate < heute Then
                 strSQL = "update stellen set oeffentlich ='" & ver & "' where id= '" & id & "' "
             End If
